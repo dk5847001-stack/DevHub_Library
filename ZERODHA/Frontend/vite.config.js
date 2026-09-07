@@ -1,5 +1,6 @@
 import { defineConfig, transformWithOxc } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 const transformJsxInJs = () => ({
     name: "transform-jsx-in-js",
@@ -20,6 +21,7 @@ const transformJsxInJs = () => ({
 export default defineConfig({
     plugins: [
         react(),
+        tailwindcss(),
         transformJsxInJs(),
     ],
 });
