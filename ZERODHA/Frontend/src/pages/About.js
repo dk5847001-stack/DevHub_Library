@@ -1,7 +1,11 @@
+import HeroSection from "../components/About/HeroSection";
+import Team from "../components/About/Team";
+
 export default function About(){
     return(
         <div>
-            <h2>Home About</h2>
+            <HeroSection />
+            <Team />
         </div>
     )
 }
