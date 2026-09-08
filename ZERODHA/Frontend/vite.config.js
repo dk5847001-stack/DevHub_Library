@@ -4,7 +4,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 const transformJsxInJs = () => ({
     name: "transform-jsx-in-js",
-
     enforce: "pre",
 
     async transform(code, id) {
@@ -24,4 +23,21 @@ export default defineConfig({
         tailwindcss(),
         transformJsxInJs(),
     ],
+
+    // Allow JSX inside .js files
+    oxc: {
+        include: /\.(js|jsx)$/,
+        jsx: {
+            runtime: "automatic",
+        },
+    },
+
+    // Important for Vite 8 dependency scanning
+    optimizeDeps: {
+        rolldownOptions: {
+            plugins: [
+                transformJsxInJs(),
+            ],
+        },
+    },
 });
