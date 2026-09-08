@@ -21,7 +21,7 @@ const navigation = [
     },
     {
         name: "Products",
-        href: "/product",
+        href: "/products",
         icon: faBoxOpen,
     },
     {
