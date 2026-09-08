@@ -10,6 +10,7 @@ import Product from "./pages/Products";
 import Signup from "./pages/Signup";
 import Support from "./pages/Support";
 import Footer from "./components/Footer";
+import NoteFound from "./pages/NoteFound";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/products" element={<Product />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/support" element={<Support />} />
+          <Route path="*" element={<NoteFound />} />
         </Routes>
         <Footer />
       </div>
