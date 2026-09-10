@@ -30,14 +30,19 @@ const navigation = [
         icon: faIndianRupeeSign,
     },
     {
-        name: "Contact Us",
-        href: "/contact",
-        icon: faAddressBook,
-    },
-    {
         name: "About Us",
         href: "/about",
         icon: faCircleInfo,
+    },
+    {
+        name: "Support",
+        href: "/support",
+        icon: faCircleInfo,
+    },
+    {
+        name: "Contact Us",
+        href: "/contact",
+        icon: faAddressBook,
     },
     {
         name: "Signup",
