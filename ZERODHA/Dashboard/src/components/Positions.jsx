@@ -1,4 +1,3 @@
-import React from "react";
 
 const Positions = () => {
   return (
@@ -7,15 +6,17 @@ const Positions = () => {
 
       <div className="order-table">
         <table>
-          <tr>
-            <th>Product</th>
-            <th>Instrument</th>
-            <th>Qty.</th>
-            <th>Avg.</th>
-            <th>LTP</th>
-            <th>P&L</th>
-            <th>Chg.</th>
-          </tr>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Instrument</th>
+              <th>Qty.</th>
+              <th>Avg.</th>
+              <th>LTP</th>
+              <th>P&amp;L</th>
+              <th>Chg.</th>
+            </tr>
+          </thead>
         </table>
       </div>
     </>
