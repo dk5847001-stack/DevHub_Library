@@ -2,11 +2,16 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const cookieParser = require("cookie-parser");
 const connectDB = require("./config/dbConfig");
 const Holdings = require("./models/Holdings");
 const Order = require("./models/Order");
 const Positions = require("./models/Positions");
 const User = require("./models/User");
+const signupRateLimiter = require("./middleware/signupRateLimiter");
+const loginRateLimiter = require("./middleware/loginRateLimiter");
 const PORT = process.env.PORT;
 const app = express();
 
@@ -22,7 +27,9 @@ app.use(
 );
 app.use(express.json());
 app.use(helmet());
-
+app.use(cookieParser());
+app.use("/signup", signupRateLimiter);
+app.use("/login", loginRateLimiter);
 connectDB();
 
 app.get("/", (req, res) => {
@@ -71,6 +78,161 @@ app.post("/newOrder", async (req, res) => {
         })
     }
 });
+
+// -------------------- Register Route -----------------------
+app.post("/signup", async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // validation check
+        if (!name || !email || !password) {
+            return res.status(401).json({
+                success: false,
+                message: "All fields are required!"
+            })
+        };
+
+        // normalizedEmail
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // if user already exists
+        const user = await User.findOne({
+            email: normalizedEmail
+        });
+        if (user) {
+            return res.status(401).json({
+                success: false,
+                message: "user with this email, already exist!"
+            })
+        };
+
+        // hashing password 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // user created successfully!
+        const savedUser = await User.create({
+            name,
+            email: normalizedEmail,
+            password: hashedPassword
+        });
+
+        // Generate jwt token
+        const token = jwt.sign(
+            {
+                userId: savedUser._id,
+                role: savedUser.role
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d"
+            }
+        );
+
+        // cookie send successfully!
+        res.cookie("jsonwebtoken", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        // response send successfully!
+        res.status(201).json({
+            success: true,
+            message: "user registered successfully! ✓",
+            user: {
+                name: savedUser.name,
+                email: savedUser.email,
+                role: savedUser.role
+            }
+        });
+
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "something went wrong!",
+            error: err.message
+        })
+    }
+});
+
+// ------------------LOGIN ROUTE---------------------
+app.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // validation check
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required!"
+            })
+        };
+
+        // normalizedEmail
+        const normalizedEmail = email.trim().toLowerCase();
+
+        // if user is not exists
+        const user = await User.findOne({
+            email: normalizedEmail
+        });
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "User not exists with this email!"
+            })
+        };
+
+        // compare password
+        const isPasswordCorrect = await bcrypt.compare(
+            password,
+            user.password
+        );
+        if (!isPasswordCorrect) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid password!"
+            })
+        };
+
+        // Generate jwt token
+        const token = jwt.sign(
+            {
+                userId: user._id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d"
+            }
+        );
+
+        // cookie send successfully!
+        res.cookie("jsonwebtoken", token, {
+            httpOnly: true,
+            secure: process.env.NOTE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        // response send successfully
+        res.status(200).json({
+            success: true,
+            message: "user logged in successfully!✓",
+            user: {
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        })
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "something went wrong!",
+            error: err.message
+        })
+    }
+})
 
 
 // app.get("/positions", async (req, res) => {
