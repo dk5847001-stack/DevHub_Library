@@ -5,7 +5,7 @@ const Positions = () => {
     useEffect(()=>{
       const fetchHoldings = async () => {
         try{
-          const response = await fetch("http://localhost:3000/allPositions",
+          const response = await fetch("http://localhost:3000/api/allPositions",
             {
               method: "GET",
             }

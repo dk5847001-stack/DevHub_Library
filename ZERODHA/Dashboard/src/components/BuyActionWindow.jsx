@@ -32,7 +32,7 @@ const BuyActionWindow = ({ uid }) => {
       setLoading(true);
 
       const response = await axios.post(
-        "http://localhost:3000/newOrder",
+        "http://localhost:3000/api/newOrder",
         {
           name: uid,
           qty: Number(stockQuantity),

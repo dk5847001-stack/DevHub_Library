@@ -5,7 +5,7 @@ const [holdings, setHoldings] = useState([]);
   useEffect(()=>{
     const fetchHoldings = async () => {
       try{
-        const response = await fetch("http://localhost:3000/allHoldings",
+        const response = await fetch("http://localhost:3000/api/allHoldings",
           {
             method: "GET",
           }

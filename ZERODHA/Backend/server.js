@@ -12,6 +12,8 @@ const Positions = require("./models/Positions");
 const User = require("./models/User");
 const signupRateLimiter = require("./middleware/signupRateLimiter");
 const loginRateLimiter = require("./middleware/loginRateLimiter");
+const adminMiddleware = require("./middleware/adminMiddleware");
+const authMiddleware = require("./middleware/authMiddleware");
 const PORT = process.env.PORT;
 const app = express();
 
@@ -30,6 +32,9 @@ app.use(helmet());
 app.use(cookieParser());
 app.use("/signup", signupRateLimiter);
 app.use("/login", loginRateLimiter);
+app.use("/api", authMiddleware);
+app.use("/admin", authMiddleware, adminMiddleware);
+
 connectDB();
 
 app.get("/", (req, res) => {
@@ -39,7 +44,16 @@ app.get("/", (req, res) => {
     })
 });
 
-app.get("/allHoldings", async (req, res) => {
+app.get("/api/auth/check", async (req, res) => {
+    const user = await User.findById(req.user.userId)
+    res.status(200).json({
+        success: true,
+        authenticated: true,
+        user
+    });
+});
+
+app.get("/api/allHoldings", async (req, res) => {
     let allHoldings = await Holdings.find({});
     res.status(200).json({
         success: true,
@@ -47,7 +61,7 @@ app.get("/allHoldings", async (req, res) => {
         allHoldings
     })
 })
-app.get("/allPositions", async (req, res) => {
+app.get("/api/allPositions", async (req, res) => {
     let allPositions = await Positions.find({});
     res.status(200).json({
         success: true,
@@ -56,7 +70,7 @@ app.get("/allPositions", async (req, res) => {
     })
 });
 
-app.post("/newOrder", async (req, res) => {
+app.post("/api/newOrder", async (req, res) => {
     try {
         const { name, qty, price, mode } = req.body;
         const newOrder = await Order.create({
@@ -232,7 +246,23 @@ app.post("/login", async (req, res) => {
             error: err.message
         })
     }
-})
+});
+
+app.post("/logout", (req, res) => {
+    res.clearCookie("jsonwebtoken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite:
+            process.env.NODE_ENV === "production"
+                ? "none"
+                : "lax",
+    });
+
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully!",
+    });
+});
 
 
 // app.get("/positions", async (req, res) => {
