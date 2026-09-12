@@ -1,7 +1,17 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+
 import { watchlist } from "../data/data";
-import { BarChartOutlined, MoreHoriz, KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
-import { Tooltip, Grow } from "@mui/material";
+
+import {
+  BarChartOutlined,
+  MoreHoriz,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+} from "@mui/icons-material";
+
+import { Tooltip } from "@mui/material";
+
+import GeneralContext from "./GeneralContext";
 
 const WatchList = () => {
   return (
@@ -73,6 +83,14 @@ const WatchListItem = ({ stock }) => {
 };
 
 const WatchListActions = ({ uid }) => {
+  const { openBuyWindow } = useContext(GeneralContext);
+
+  const handleBuyClick = () => {
+    console.log("Buy clicked:", uid);
+
+    openBuyWindow(uid);
+  };
+
   return (
     <span className="actions">
       <span>
@@ -80,27 +98,38 @@ const WatchListActions = ({ uid }) => {
           title="Buy (B)"
           placement="top"
           arrow
-          TransitionComponent={Grow}
         >
-          <button className="buy">Buy</button>
+          <button
+            type="button"
+            className="buy"
+            onClick={handleBuyClick}
+          >
+            Buy
+          </button>
         </Tooltip>
 
         <Tooltip
           title="Sell (S)"
           placement="top"
           arrow
-          TransitionComponent={Grow}
         >
-          <button className="sell">Sell</button>
+          <button
+            type="button"
+            className="sell"
+          >
+            Sell
+          </button>
         </Tooltip>
 
         <Tooltip
           title="Analytics (A)"
           placement="top"
           arrow
-          TransitionComponent={Grow}
         >
-          <button className="action">
+          <button
+            type="button"
+            className="action"
+          >
             <BarChartOutlined className="icon" />
           </button>
         </Tooltip>
@@ -109,9 +138,11 @@ const WatchListActions = ({ uid }) => {
           title="More"
           placement="top"
           arrow
-          TransitionComponent={Grow}
         >
-          <button className="action">
+          <button
+            type="button"
+            className="action"
+          >
             <MoreHoriz className="icon" />
           </button>
         </Tooltip>
