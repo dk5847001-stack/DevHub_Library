@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 const Menu = () => {
     const location = useLocation();
     const navigate = useNavigate();
-
+    const API_URL = import.meta.env.VITE_API_URL;
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -17,7 +17,7 @@ const Menu = () => {
         const checkAuth = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:3000/api/auth/check",
+                    `${API_URL}/api/auth/check`,
                     {
                         method: "GET",
                         credentials: "include",

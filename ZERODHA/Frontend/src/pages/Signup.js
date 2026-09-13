@@ -11,7 +11,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 export default function Signup() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const API_URL = import.meta.env.VITE_API_URL;
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -31,7 +31,7 @@ export default function Signup() {
 
         try {
             const response = await fetch(
-                "http://localhost:3000/signup",
+                `${API_URL}/signup`,
                 {
                     method: "POST",
                     credentials: "include",

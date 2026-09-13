@@ -56,7 +56,7 @@ export default function Navbar() {
     const [loading, setLoading] = useState(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [logoutLoading, setLogoutLoading] = useState(false);
-
+    const API_URL = import.meta.env.VITE_API_URL;
     // =========================================
     // CHECK AUTHENTICATION
     // =========================================
@@ -65,7 +65,7 @@ export default function Navbar() {
         const checkAuthentication = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:3000/api/auth/check",
+                    `${API_URL}/api/auth/check`,
                     {
                         method: "GET",
                         credentials: "include",
@@ -111,7 +111,7 @@ export default function Navbar() {
             setLogoutLoading(true);
 
             const response = await fetch(
-                "http://localhost:3000/logout",
+                `${API_URL}/logout`,
                 {
                     method: "POST",
                     credentials: "include",

@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 const Summary = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const API_URL = import.meta.env.VITE_API_URL;
     useEffect(() => {
         let isMounted = true;
 
         const checkAuth = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:3000/api/auth/check",
+                    `${API_URL}/api/auth/check`,
                     {
                         method: "GET",
                         credentials: "include",

@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import axios from "axios";
 
 import GeneralContext from "./GeneralContext";
-
+const API_URL = import.meta.env.VITE_API_URL;
 import "./BuyActionWindow.css";
 
 const BuyActionWindow = ({ uid }) => {
@@ -32,7 +32,7 @@ const BuyActionWindow = ({ uid }) => {
       setLoading(true);
 
       const response = await axios.post(
-        "http://localhost:3000/api/newOrder",
+        `${API_URL}/api/newOrder`,
         {
           name: uid,
           qty: Number(stockQuantity),
