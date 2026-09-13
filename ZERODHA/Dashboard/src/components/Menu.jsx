@@ -4,18 +4,34 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 const Menu = () => {
     const location = useLocation();
     const navigate = useNavigate();
+
     const API_URL = import.meta.env.VITE_API_URL;
+    const LOGIN_URL =
+        import.meta.env.VITE_LOGIN_URL ||
+        "http://localhost:5174/login";
+
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+    const [isProfileDropdownOpen, setIsProfileDropdownOpen] =
+        useState(false);
     const [logoutLoading, setLogoutLoading] = useState(false);
 
     // ==============================
     // Check Authentication
     // ==============================
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                if (!API_URL) {
+                    console.error(
+                        "VITE_API_URL is not configured."
+                    );
+
+                    window.location.replace(LOGIN_URL);
+                    return;
+                }
+
                 const response = await fetch(
                     `${API_URL}/api/auth/check`,
                     {
@@ -26,46 +42,86 @@ const Menu = () => {
 
                 const data = await response.json();
 
-                if (response.ok && data.success && data.authenticated) {
+                console.log("Auth Check:", data);
+
+                if (
+                    response.ok &&
+                    data.success &&
+                    data.authenticated &&
+                    data.user
+                ) {
                     setUser(data.user);
                 } else {
-                    window.location.replace("http://localhost:5174/login");
+                    setUser(null);
+                    window.location.replace(LOGIN_URL);
                 }
             } catch (error) {
-                console.error("Auth check failed:", error);
-                window.location.replace("http://localhost:5174/login");
+                console.error(
+                    "Auth check failed:",
+                    error
+                );
+
+                setUser(null);
+                window.location.replace(LOGIN_URL);
             } finally {
                 setLoading(false);
             }
         };
 
         checkAuth();
-    }, []);
+    }, [API_URL, LOGIN_URL]);
 
     // ==============================
     // Logout
     // ==============================
+
     const handleLogout = async () => {
         if (logoutLoading) return;
 
         try {
             setLogoutLoading(true);
 
-            const response = await fetch("http://localhost:3000/logout", {
-                method: "POST",
-                credentials: "include",
-            });
+            if (!API_URL) {
+                console.error(
+                    "VITE_API_URL is not configured."
+                );
+
+                window.location.replace(LOGIN_URL);
+                return;
+            }
+
+            const response = await fetch(
+                `${API_URL}/logout`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                }
+            );
 
             const data = await response.json();
 
+            console.log("Logout response:", data);
+
             if (response.ok && data.success) {
-                window.location.replace("http://localhost:5174/login");
+                setUser(null);
+                setIsProfileDropdownOpen(false);
+
+                window.location.replace(LOGIN_URL);
             } else {
-                alert(data.message || "Logout failed");
+                alert(
+                    data.message ||
+                        "Logout failed"
+                );
             }
         } catch (error) {
-            console.error("Logout error:", error);
-            alert("Unable to logout. Please try again.");
+            console.error(
+                "Logout error:",
+                error
+            );
+
+            alert(
+                "Unable to logout. Please try again."
+            );
         } finally {
             setLogoutLoading(false);
         }
@@ -74,6 +130,7 @@ const Menu = () => {
     // ==============================
     // User Name
     // ==============================
+
     const userName =
         user?.name ||
         user?.username ||
@@ -83,13 +140,16 @@ const Menu = () => {
     // ==============================
     // User Initials
     // ==============================
+
     const getInitials = (name) => {
         if (!name) return "U";
 
         const words = name.trim().split(" ");
 
         if (words.length === 1) {
-            return words[0].substring(0, 2).toUpperCase();
+            return words[0]
+                .substring(0, 2)
+                .toUpperCase();
         }
 
         return (
@@ -103,13 +163,18 @@ const Menu = () => {
     // ==============================
     // Active Menu
     // ==============================
+
     const isActive = (path) => {
         return location.pathname === path;
     };
 
+    // ==============================
+    // Loading
+    // ==============================
+
     if (loading) {
         return (
-            <div className="h-[70px] w-full border-b border-gray-200 bg-white flex items-center justify-center">
+            <div className="flex h-[70px] w-full items-center justify-center border-b border-gray-200 bg-white">
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-red-500"></div>
             </div>
         );
@@ -117,16 +182,18 @@ const Menu = () => {
 
     return (
         <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white">
-
             <div className="mx-auto flex h-[70px] w-full items-center justify-between px-5 md:px-8 lg:px-10">
 
                 {/* ==============================
                     Logo
                 ============================== */}
+
                 <Link
                     to="/"
-                    className="flex items-center shrink-0"
-                    onClick={() => setIsProfileDropdownOpen(false)}
+                    className="flex shrink-0 items-center"
+                    onClick={() =>
+                        setIsProfileDropdownOpen(false)
+                    }
                 >
                     <img
                         src="/icon.png"
@@ -138,7 +205,8 @@ const Menu = () => {
                 {/* ==============================
                     Desktop Navigation
                 ============================== */}
-                <nav className="hidden md:flex items-center gap-1">
+
+                <nav className="hidden items-center gap-1 md:flex">
 
                     <Link
                         to="/"
@@ -205,31 +273,38 @@ const Menu = () => {
                     >
                         Apps
                     </Link>
+
                 </nav>
 
                 {/* ==============================
                     Profile Section
                 ============================== */}
+
                 <div className="relative shrink-0">
 
                     <button
                         type="button"
                         onClick={() =>
-                            setIsProfileDropdownOpen((prev) => !prev)
+                            setIsProfileDropdownOpen(
+                                (prev) => !prev
+                            )
                         }
                         className="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-gray-50"
                     >
                         {/* Avatar */}
+
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-100 text-xs font-medium text-purple-500">
                             {initials}
                         </div>
 
                         {/* Name */}
-                        <span className="hidden lg:block max-w-[150px] truncate text-sm text-gray-700">
+
+                        <span className="hidden max-w-[150px] truncate text-sm text-gray-700 lg:block">
                             {userName}
                         </span>
 
                         {/* Arrow */}
+
                         <svg
                             className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${
                                 isProfileDropdownOpen
@@ -250,21 +325,25 @@ const Menu = () => {
                     {/* ==============================
                         Profile Dropdown
                     ============================== */}
+
                     {isProfileDropdownOpen && (
                         <>
-                            {/* Overlay for mobile / outside click */}
+                            {/* Overlay */}
+
                             <div
                                 className="fixed inset-0 z-40"
                                 onClick={() =>
-                                    setIsProfileDropdownOpen(false)
+                                    setIsProfileDropdownOpen(
+                                        false
+                                    )
                                 }
                             />
 
                             <div className="absolute right-0 top-14 z-50 w-64 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
 
                                 {/* User Information */}
-                                <div className="border-b border-gray-100 px-4 py-4">
 
+                                <div className="border-b border-gray-100 px-4 py-4">
                                     <div className="flex items-center gap-3">
 
                                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-100 text-sm font-semibold text-purple-500">
@@ -272,27 +351,34 @@ const Menu = () => {
                                         </div>
 
                                         <div className="min-w-0">
+
                                             <p className="truncate text-sm font-semibold text-gray-800">
                                                 {userName}
                                             </p>
 
                                             <p className="truncate text-xs text-gray-500">
-                                                {user?.email || "User Account"}
+                                                {user?.email ||
+                                                    "User Account"}
                                             </p>
+
                                         </div>
 
                                     </div>
-
                                 </div>
 
                                 {/* Dropdown Items */}
+
                                 <div className="p-2">
 
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setIsProfileDropdownOpen(false);
-                                            navigate("/profile");
+                                            setIsProfileDropdownOpen(
+                                                false
+                                            );
+                                            navigate(
+                                                "/profile"
+                                            );
                                         }}
                                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-red-500"
                                     >
@@ -300,14 +386,20 @@ const Menu = () => {
                                             👤
                                         </span>
 
-                                        <span>Profile</span>
+                                        <span>
+                                            Profile
+                                        </span>
                                     </button>
 
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            setIsProfileDropdownOpen(false);
-                                            navigate("/settings");
+                                            setIsProfileDropdownOpen(
+                                                false
+                                            );
+                                            navigate(
+                                                "/settings"
+                                            );
                                         }}
                                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-red-500"
                                     >
@@ -315,19 +407,27 @@ const Menu = () => {
                                             ⚙️
                                         </span>
 
-                                        <span>Settings</span>
+                                        <span>
+                                            Settings
+                                        </span>
                                     </button>
 
                                     <div className="my-1 border-t border-gray-100" />
 
                                     <button
                                         type="button"
-                                        disabled={logoutLoading}
-                                        onClick={handleLogout}
+                                        disabled={
+                                            logoutLoading
+                                        }
+                                        onClick={
+                                            handleLogout
+                                        }
                                         className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         <span className="text-base">
-                                            {logoutLoading ? "⏳" : "↪"}
+                                            {logoutLoading
+                                                ? "⏳"
+                                                : "↪"}
                                         </span>
 
                                         <span>
@@ -342,14 +442,13 @@ const Menu = () => {
                         </>
                     )}
                 </div>
-
             </div>
 
             {/* ==============================
                 Mobile Navigation
             ============================== */}
-            <div className="border-t border-gray-100 md:hidden">
 
+            <div className="border-t border-gray-100 md:hidden">
                 <nav className="flex overflow-x-auto px-3 py-2">
 
                     <Link
@@ -419,9 +518,7 @@ const Menu = () => {
                     </Link>
 
                 </nav>
-
             </div>
-
         </header>
     );
 };
