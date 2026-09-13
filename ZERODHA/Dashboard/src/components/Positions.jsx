@@ -8,6 +8,7 @@ const Positions = () => {
           const response = await fetch("http://localhost:3000/api/allPositions",
             {
               method: "GET",
+              credentials: "include"
             }
           );
           const data = await response.json();

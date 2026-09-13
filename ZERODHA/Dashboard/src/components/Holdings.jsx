@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { VerticalChartGraph } from "./VerticalChartGraph";
 
 const Holdings = () => {
 const [holdings, setHoldings] = useState([]);
@@ -8,6 +9,7 @@ const [holdings, setHoldings] = useState([]);
         const response = await fetch("http://localhost:3000/api/allHoldings",
           {
             method: "GET",
+            credentials: "include"
           }
         );
         const data = await response.json();
@@ -21,6 +23,18 @@ const [holdings, setHoldings] = useState([]);
     };
     fetchHoldings();
   }, []);
+
+  const labels = holdings.map((subArray)=> subArray["name"]);
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: "Stock Name",
+        data: holdings.map((stock)=> stock.price),
+        backgroundColor: "rgba(255, 99, 132, 0.5)",
+      },
+    ],
+  };
   return (
     <>
       <h3 className="title">Holdings ({holdings.length})</h3>
@@ -83,6 +97,7 @@ const [holdings, setHoldings] = useState([]);
           <p>P&amp;L</p>
         </div>
       </div>
+      <VerticalChartGraph data={data} />
     </>
   );
 };
